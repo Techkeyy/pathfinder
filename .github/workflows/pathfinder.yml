@@ -1,0 +1,25 @@
+# Example consumer workflow — drop this into a data repo (dbt project, etc.).
+# On every PR that touches SQL, Pathfinder comments with the cross-stack +
+# ML blast radius from DataHub.
+name: Pathfinder
+
+on:
+  pull_request:
+    paths:
+      - "**/*.sql"
+
+permissions:
+  pull-requests: write   # to post the comment
+  contents: read
+
+jobs:
+  impact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: OWNER/pathfinder/action@main
+        with:
+          datahub-url: ${{ secrets.DATAHUB_GMS_URL }}
+          datahub-token: ${{ secrets.DATAHUB_GMS_TOKEN }}
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}   # optional
+          fail-on-breaking: "false"   # set "true" to block merges on breaking changes

@@ -1,0 +1,125 @@
+{
+  "pr": {
+    "repo": "acme/warehouse",
+    "number": 42,
+    "title": "local run",
+    "author": "",
+    "url": "https://github.com/acme/warehouse"
+  },
+  "overall": "breaking",
+  "total_blast": 6,
+  "assessments": [
+    {
+      "change": {
+        "dataset": "orders",
+        "change_type": "rename",
+        "column": "customer_id",
+        "detail": "renamed `customer_id` -> `cust_id`",
+        "before": "customer_id",
+        "after": "cust_id"
+      },
+      "overall": "breaking",
+      "rationale": "renamed `customer_id` -> `cust_id`: touches 6 downstream assets, including 5 in PRODUCTION (customer_value, daily_orders, Exec Revenue). Treat as breaking.",
+      "verdicts": [
+        {
+          "severity": "breaking",
+          "reason": "consumes `customer_id` as a feature/schema input directly; renaming or dropping it breaks the model at serve time",
+          "asset": {
+            "urn": "urn:li:mlFeature:(customer_features,customer_value)",
+            "name": "customer_value",
+            "type": "MLFEATURE",
+            "platform": "feast",
+            "degree": 1,
+            "is_production": true,
+            "owners": [
+              "maria@acme.com"
+            ]
+          }
+        },
+        {
+          "severity": "breaking",
+          "reason": "reads `customer_id` directly; the reference will fail to resolve",
+          "asset": {
+            "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,analytics.daily_orders,PROD)",
+            "name": "daily_orders",
+            "type": "DATASET",
+            "platform": "snowflake",
+            "degree": 1,
+            "is_production": true,
+            "owners": [
+              "dana@acme.com"
+            ]
+          }
+        },
+        {
+          "severity": "breaking",
+          "reason": "binds to `customer_id` by name 2 hops downstream; the tile will error or go blank",
+          "asset": {
+            "urn": "urn:li:dashboard:(looker,exec_revenue)",
+            "name": "Exec Revenue",
+            "type": "DASHBOARD",
+            "platform": "looker",
+            "degree": 2,
+            "is_production": true,
+            "owners": [
+              "finance-team"
+            ]
+          }
+        },
+        {
+          "severity": "breaking",
+          "reason": "consumes `customer_id` as a feature/schema input 2 hops downstream; renaming or dropping it breaks the model at serve time",
+          "asset": {
+            "urn": "urn:li:mlModel:(urn:li:dataPlatform:mlflow,churn_model,PROD)",
+            "name": "churn_model",
+            "type": "MLMODEL",
+            "platform": "mlflow",
+            "degree": 2,
+            "is_production": true,
+            "owners": [
+              "maria@acme.com"
+            ]
+          }
+        },
+        {
+          "severity": "breaking",
+          "reason": "consumes `customer_id` as a feature/schema input 2 hops downstream; renaming or dropping it breaks the model at serve time",
+          "asset": {
+            "urn": "urn:li:mlModelDeployment:(urn:li:dataPlatform:sagemaker,churn_model_prod,PROD)",
+            "name": "churn_model (serving)",
+            "type": "MLMODEL_DEPLOYMENT",
+            "platform": "sagemaker",
+            "degree": 2,
+            "is_production": true,
+            "owners": [
+              "maria@acme.com"
+            ]
+          }
+        },
+        {
+          "severity": "partial",
+          "reason": "depends on `customer_id` 2 hops downstream but an intermediate model may shield it \u2014 verify",
+          "asset": {
+            "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,analytics.ltv_calc,PROD)",
+            "name": "ltv_calc",
+            "type": "DATASET",
+            "platform": "snowflake",
+            "degree": 2,
+            "is_production": true,
+            "owners": [
+              "dana@acme.com"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "remediations": [
+    {
+      "title": "Compatibility alias for orders.customer_id",
+      "language": "sql",
+      "body": "-- Pathfinder shim for `orders`: keep `customer_id` available while consumers\n-- migrate to `cust_id`. Remove after all downstream owners have moved.\nselect\n    *,\n    cust_id as customer_id  -- deprecated alias\nfrom {{ ref('orders') }}",
+      "explanation": "Add `cust_id as customer_id` so existing references to `customer_id` keep resolving."
+    }
+  ]
+}

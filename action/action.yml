@@ -1,0 +1,48 @@
+name: "Pathfinder"
+description: "Catch breaking data changes before they merge, using DataHub lineage."
+branding:
+  icon: "compass"
+  color: "blue"
+
+inputs:
+  datahub-url:
+    description: "DataHub GMS base URL (GraphQL served at {url}/api/graphql)"
+    required: true
+  datahub-token:
+    description: "DataHub personal access token"
+    required: true
+  github-token:
+    description: "Token used to post the PR comment"
+    required: true
+    default: ${{ github.token }}
+  anthropic-api-key:
+    description: "Optional: enables LLM-written rationale + polished fixes"
+    required: false
+    default: ""
+  fail-on-breaking:
+    description: "Fail the check (block merge) when a breaking change is found"
+    required: false
+    default: "false"
+  pathfinder-ref:
+    description: "Git ref of Pathfinder to install"
+    required: false
+    default: "main"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    - name: Install Pathfinder
+      shell: bash
+      run: pip install "git+https://github.com/OWNER/pathfinder@${{ inputs.pathfinder-ref }}"
+    - name: Run Pathfinder on this PR
+      shell: bash
+      env:
+        DATAHUB_GMS_URL: ${{ inputs.datahub-url }}
+        DATAHUB_GMS_TOKEN: ${{ inputs.datahub-token }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        PATHFINDER_FAIL_ON_BREAKING: ${{ inputs.fail-on-breaking }}
+      run: pathfinder run --pr "${{ github.event.pull_request.html_url }}"

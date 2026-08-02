@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pathfinder-agent"
+version = "0.1.0"
+description = "A pull-request agent that walks DataHub lineage to catch breaking data changes before they merge."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Pathfinder" }]
+keywords = ["datahub", "data-lineage", "impact-analysis", "ai-agent", "mcp", "data-engineering"]
+
+dependencies = [
+    "requests>=2.31",
+    "sqlglot>=23.0",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.40"]
+openai = ["openai>=1.40"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+pathfinder = "pathfinder.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["pathfinder*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

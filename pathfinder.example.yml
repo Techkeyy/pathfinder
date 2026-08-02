@@ -1,0 +1,22 @@
+# Copy to `pathfinder.yml` and adjust. Every value can also come from an env var
+# (see pathfinder/config.py) so CI never needs this file checked in with secrets.
+
+# --- DataHub ---------------------------------------------------------------
+datahub_url: "http://localhost:8080"     # GMS base; GraphQL at {url}/api/graphql
+# datahub_token: set via DATAHUB_GMS_TOKEN instead of committing it
+default_platform: "dbt"                    # platform used to resolve a bare model name
+default_env: "PROD"
+max_hops: 3                                # how many lineage hops to walk downstream
+
+# --- LLM (optional) --------------------------------------------------------
+llm_provider: "anthropic"                  # "anthropic" | "openai" | "none"
+llm_model: "claude-sonnet-5"
+# llm_api_key: set via ANTHROPIC_API_KEY / OPENAI_API_KEY
+
+# --- behaviour -------------------------------------------------------------
+fail_on_breaking: false                     # exit non-zero to block a merge on breaking
+production_markers: ["prod", "production", "serving", "live"]
+
+# Force a platform for specific models when it cannot be inferred.
+platform_overrides:
+  # orders: snowflake

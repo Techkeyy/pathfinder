@@ -1,0 +1,58 @@
+{
+  "orders": [
+    {
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,analytics.daily_orders,PROD)",
+      "name": "daily_orders",
+      "type": "DATASET",
+      "platform": "snowflake",
+      "degree": 1,
+      "is_production": true,
+      "owners": ["dana@acme.com"]
+    },
+    {
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,analytics.ltv_calc,PROD)",
+      "name": "ltv_calc",
+      "type": "DATASET",
+      "platform": "snowflake",
+      "degree": 2,
+      "is_production": true,
+      "owners": ["dana@acme.com"]
+    },
+    {
+      "urn": "urn:li:dashboard:(looker,exec_revenue)",
+      "name": "Exec Revenue",
+      "type": "DASHBOARD",
+      "platform": "looker",
+      "degree": 2,
+      "is_production": true,
+      "owners": ["finance-team"]
+    },
+    {
+      "urn": "urn:li:mlFeature:(customer_features,customer_value)",
+      "name": "customer_value",
+      "type": "MLFEATURE",
+      "platform": "feast",
+      "degree": 1,
+      "is_production": true,
+      "owners": ["maria@acme.com"]
+    },
+    {
+      "urn": "urn:li:mlModel:(urn:li:dataPlatform:mlflow,churn_model,PROD)",
+      "name": "churn_model",
+      "type": "MLMODEL",
+      "platform": "mlflow",
+      "degree": 2,
+      "is_production": true,
+      "owners": ["maria@acme.com"]
+    },
+    {
+      "urn": "urn:li:mlModelDeployment:(urn:li:dataPlatform:sagemaker,churn_model_prod,PROD)",
+      "name": "churn_model (serving)",
+      "type": "MLMODEL_DEPLOYMENT",
+      "platform": "sagemaker",
+      "degree": 2,
+      "is_production": true,
+      "owners": ["maria@acme.com"]
+    }
+  ]
+}
