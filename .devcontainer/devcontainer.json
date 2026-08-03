@@ -1,0 +1,29 @@
+{
+  "name": "Pathfinder + DataHub",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": true,
+      "version": "latest"
+    }
+  },
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "16gb",
+    "storage": "32gb"
+  },
+  "forwardPorts": [9002, 8080],
+  "portsAttributes": {
+    "9002": { "label": "DataHub UI", "onAutoForward": "notify" },
+    "8080": { "label": "DataHub GMS / GraphQL", "onAutoForward": "silent" }
+  },
+  "postCreateCommand": "bash .devcontainer/postCreate.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  },
+  "remoteEnv": {
+    "DATAHUB_GMS_URL": "http://localhost:8080"
+  }
+}

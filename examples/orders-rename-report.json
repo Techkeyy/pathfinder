@@ -1,10 +1,10 @@
 {
   "pr": {
-    "repo": "acme/warehouse",
-    "number": 42,
+    "repo": "local/demo",
+    "number": 0,
     "title": "local run",
     "author": "",
-    "url": "https://github.com/acme/warehouse"
+    "url": ""
   },
   "overall": "breaking",
   "total_blast": 6,

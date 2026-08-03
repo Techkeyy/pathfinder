@@ -78,16 +78,37 @@ pathfinder run --pr https://github.com/acme/warehouse/pull/42
 
 Or run it as CI on every PR — see [`action.yml`](action/action.yml).
 
-## Try the demo (no external accounts)
+## Try the demo — one click, reproducible (GitHub Codespaces)
+
+DataHub needs Linux + Docker and ~8 GB RAM, so the demo runs in a Codespace with
+everything pre-wired (a committed [`.devcontainer`](.devcontainer/devcontainer.json)).
+
+1. **Code ▸ Codespaces ▸ Create codespace on `main`** (pick the 4-core / 16 GB machine).
+   The devcontainer installs Pathfinder + the DataHub CLI automatically.
+2. Boot DataHub and seed the demo graph (tables → dashboard → ML feature → model → deployment):
+   ```bash
+   bash demo/up.sh          # first run pulls images, ~5-10 min
+   ```
+3. Confirm the live lineage schema, then run Pathfinder against the seeded change:
+   ```bash
+   pathfinder doctor
+   pathfinder run --before demo/changes/orders_before.sql \
+                  --after  demo/changes/orders_after.sql --dataset orders
+   ```
+   DataHub's UI is on forwarded port **9002** (login `datahub` / `datahub`); you'll
+   see Pathfinder's write-back appear on the `analytics.orders` column.
+
+**No Codespace?** The full pipeline also runs offline against a lineage fixture —
+no DataHub needed — which is how the sample below was generated:
 
 ```bash
-cd demo && ./up.sh      # DataHub + a seeded stack incl. an ML model
+pip install -e .
 pathfinder run --before demo/changes/orders_before.sql \
                --after  demo/changes/orders_after.sql \
-               --dataset orders --dry-run
+               --dataset orders --lineage-fixture demo/lineage.json --dry-run
 ```
 
-Sample outputs judges can read without running anything live are in
+Sample outputs judges can read without running anything are in
 [`examples/`](examples/).
 
 ## Architecture

@@ -1,26 +1,42 @@
 """Seed the demo stack into a local DataHub.
 
-Emits the datasets, a dashboard, and the ML feature -> model -> deployment chain
-plus the lineage edges between them, so Pathfinder's blast radius spans tables
-AND ML — mirroring demo/lineage.json.
+Builds the exact graph Pathfinder's blast radius walks — tables AND ML — so the
+live demo matches demo/lineage.json:
 
-NOTE: this talks to a running DataHub (localhost:8080) and therefore is *not*
-part of the unit tests — it is exercised on Day 2 via `demo/up.sh`. Run:
+    raw.stg_orders
+        └─ analytics.orders            (the model the demo PR changes)
+             ├─ analytics.daily_orders ──► 📊 Exec Revenue (dashboard)
+             │        └─ analytics.ltv_calc
+             └─ 🧬 customer_value (ML feature)
+                      └─ 🤖 churn_model (ML model) ──► 🚀 churn_model_prod (deployment)
 
-    python demo/seed.py            # after `datahub docker quickstart`
+Run inside the Codespace (or any host with a running DataHub):
+
+    $HOME/.dh/bin/python demo/seed.py      # emitter lives in the isolated venv
 
 Env: DATAHUB_GMS_URL (default http://localhost:8080), DATAHUB_GMS_TOKEN (optional).
+
+Each non-core section is wrapped so a single SDK field-name drift reports itself
+(printed as SKIPPED with the reason) instead of aborting the whole seed — the
+dataset lineage always lands.
 """
 
 from __future__ import annotations
 
 import os
 
-from datahub.emitter.mce_builder import make_data_platform_urn, make_dataset_urn
+from datahub.emitter.mce_builder import make_dataset_urn
 from datahub.emitter.mcp import MetadataChangeProposalWrapper
 from datahub.emitter.rest_emitter import DatahubRestEmitter
 from datahub.metadata.schema_classes import (
+    AuditStampClass,
+    ChangeAuditStampsClass,
+    DashboardInfoClass,
     DatasetLineageTypeClass,
+    MLFeaturePropertiesClass,
+    MLFeatureTablePropertiesClass,
+    MLModelDeploymentPropertiesClass,
+    MLModelPropertiesClass,
     OwnerClass,
     OwnershipClass,
     OwnershipTypeClass,
@@ -31,52 +47,101 @@ from datahub.metadata.schema_classes import (
 GMS = os.environ.get("DATAHUB_GMS_URL", "http://localhost:8080")
 TOKEN = os.environ.get("DATAHUB_GMS_TOKEN")
 
+# --- URNs (string form is stable across DataHub versions) -----------------
+STG = make_dataset_urn("snowflake", "raw.stg_orders", "PROD")
+ORDERS = make_dataset_urn("snowflake", "analytics.orders", "PROD")
+DAILY = make_dataset_urn("snowflake", "analytics.daily_orders", "PROD")
+LTV = make_dataset_urn("snowflake", "analytics.ltv_calc", "PROD")
+DASHBOARD = "urn:li:dashboard:(looker,exec_revenue)"
+FEATURE_TABLE = "urn:li:mlFeatureTable:(urn:li:dataPlatform:feast,customer_features)"
+FEATURE = "urn:li:mlFeature:(customer_features,customer_value)"
+MODEL = "urn:li:mlModel:(urn:li:dataPlatform:mlflow,churn_model,PROD)"
+DEPLOYMENT = "urn:li:mlModelDeployment:(urn:li:dataPlatform:sagemaker,churn_model_prod,PROD)"
 
-def ds(name: str, platform: str = "snowflake", env: str = "PROD") -> str:
-    return make_dataset_urn(platform=platform, name=name, env=env)
+_T0 = AuditStampClass(time=0, actor="urn:li:corpuser:datahub")
 
 
-def owner_aspect(user_or_group: str, is_group: bool = False) -> OwnershipClass:
+def _owner(who: str, is_group: bool = False) -> OwnershipClass:
     prefix = "urn:li:corpGroup:" if is_group else "urn:li:corpuser:"
     return OwnershipClass(
-        owners=[OwnerClass(owner=f"{prefix}{user_or_group}", type=OwnershipTypeClass.TECHNICAL_OWNER)]
+        owners=[OwnerClass(owner=f"{prefix}{who}", type=OwnershipTypeClass.TECHNICAL_OWNER)]
     )
 
 
-def upstream(edges: list[str]) -> UpstreamLineageClass:
+def _upstreams(urns: list[str]) -> UpstreamLineageClass:
     return UpstreamLineageClass(
-        upstreams=[UpstreamClass(dataset=u, type=DatasetLineageTypeClass.TRANSFORMED) for u in edges]
+        upstreams=[UpstreamClass(dataset=u, type=DatasetLineageTypeClass.TRANSFORMED) for u in urns]
     )
+
+
+def _emit(emitter: DatahubRestEmitter, urn: str, aspect) -> None:
+    emitter.emit(MetadataChangeProposalWrapper(entityUrn=urn, aspect=aspect))
+
+
+def _section(name: str, fn) -> None:
+    try:
+        fn()
+        print(f"  ✓ {name}")
+    except Exception as exc:  # noqa: BLE001 - report + continue; fix live in Codespace
+        print(f"  ⚠ SKIPPED {name}: {type(exc).__name__}: {exc}")
 
 
 def main() -> None:
     emitter = DatahubRestEmitter(gms_server=GMS, token=TOKEN)
+    print(f"Seeding {GMS} ...")
 
-    stg = ds("raw.stg_orders")
-    orders = ds("analytics.orders")
-    daily = ds("analytics.daily_orders")
-    ltv = ds("analytics.ltv_calc")
+    # --- core: dataset lineage + owners (must always land) ---
+    def core():
+        _emit(emitter, ORDERS, _upstreams([STG]))
+        _emit(emitter, DAILY, _upstreams([ORDERS]))
+        _emit(emitter, LTV, _upstreams([DAILY]))
+        for urn in (ORDERS, DAILY, LTV):
+            _emit(emitter, urn, _owner("dana"))
+    _section("datasets + lineage (stg→orders→daily→ltv)", core)
 
-    # Dataset lineage: stg -> orders -> {daily, ltv}
-    edges = {orders: [stg], daily: [orders], ltv: [orders]}
-    owners = {
-        orders: owner_aspect("dana"),
-        daily: owner_aspect("dana"),
-        ltv: owner_aspect("dana"),
-    }
+    # --- dashboard consuming daily_orders ---
+    def dashboard():
+        info = DashboardInfoClass(
+            title="Exec Revenue",
+            description="Executive revenue dashboard (depends on analytics.daily_orders).",
+            lastModified=ChangeAuditStampsClass(created=_T0, lastModified=_T0),
+            datasets=[DAILY],
+        )
+        _emit(emitter, DASHBOARD, info)
+        _emit(emitter, DASHBOARD, _owner("finance-team", is_group=True))
+    _section("dashboard Exec Revenue → daily_orders", dashboard)
 
-    for urn in (stg, orders, daily, ltv):
-        if urn in edges:
-            emitter.emit(MetadataChangeProposalWrapper(entityUrn=urn, aspect=upstream(edges[urn])))
-        if urn in owners:
-            emitter.emit(MetadataChangeProposalWrapper(entityUrn=urn, aspect=owners[urn]))
+    # --- ML feature sourced from orders ---
+    def feature():
+        _emit(emitter, FEATURE, MLFeaturePropertiesClass(
+            description="Rolling customer value; sourced from analytics.orders.",
+            sources=[ORDERS],
+        ))
+        _emit(emitter, FEATURE_TABLE, MLFeatureTablePropertiesClass(
+            description="Customer feature table.",
+            mlFeatures=[FEATURE],
+        ))
+    _section("ML feature customer_value ← orders", feature)
 
-    # -- ML chain: orders -> customer_value (feature) -> churn_model -> deployment
-    # The ML entity aspects (MLFeaturePropertiesClass sources, MLModelPropertiesClass
-    # mlFeatures + deployments) are emitted here on Day 2 once verified against the
-    # running instance; see docs.datahub.com feature-store tutorial. Kept explicit so
-    # the seeded graph matches demo/lineage.json exactly.
-    print(f"Seeded datasets + lineage into {GMS}. (ML chain: complete on Day 2 per BUILD_PLAN.)")
+    # --- ML model consuming the feature, with a live deployment ---
+    def model():
+        _emit(emitter, MODEL, MLModelPropertiesClass(
+            description="Churn prediction model (PROD).",
+            mlFeatures=[FEATURE],
+            deployments=[DEPLOYMENT],
+        ))
+        _emit(emitter, MODEL, _owner("maria"))
+        _emit(emitter, DEPLOYMENT, MLModelDeploymentPropertiesClass(
+            description="Live churn_model serving endpoint.",
+        ))
+        _emit(emitter, DEPLOYMENT, _owner("maria"))
+    _section("ML model churn_model ← feature, → deployment", model)
+
+    print(
+        f"\nDone. Blast radius from analytics.orders should include daily_orders, ltv_calc,\n"
+        f"Exec Revenue, customer_value, churn_model, churn_model_prod.\n"
+        f"UI: forwarded port 9002  |  GraphQL: {GMS}/api/graphql"
+    )
 
 
 if __name__ == "__main__":
