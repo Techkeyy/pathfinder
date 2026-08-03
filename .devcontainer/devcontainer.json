@@ -1,12 +1,7 @@
 {
   "name": "Pathfinder + DataHub",
-  "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "moby": true,
-      "version": "latest"
-    }
-  },
+  "//": "universal image ships Docker-in-Docker + Python + pip already, so there is no build-time feature to fail (the python:3.11 + docker-in-docker feature combo failed to install and dropped us into an Alpine recovery container).",
+  "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
   "hostRequirements": {
     "cpus": 4,
     "memory": "16gb",
@@ -18,12 +13,12 @@
     "8080": { "label": "DataHub GMS / GraphQL", "onAutoForward": "silent" }
   },
   "postCreateCommand": "bash .devcontainer/postCreate.sh",
+  "remoteEnv": {
+    "DATAHUB_GMS_URL": "http://localhost:8080"
+  },
   "customizations": {
     "vscode": {
       "extensions": ["ms-python.python"]
     }
-  },
-  "remoteEnv": {
-    "DATAHUB_GMS_URL": "http://localhost:8080"
   }
 }

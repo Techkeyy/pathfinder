@@ -13,6 +13,14 @@ GMS="${DATAHUB_GMS_URL:-http://localhost:8080}"
 [ -x "$DH" ] || DH="python"
 [ -x "$DH_CLI" ] || DH_CLI="datahub"
 
+echo "== Waiting for the Docker daemon =="
+for i in $(seq 1 20); do docker info >/dev/null 2>&1 && { echo "docker ready"; break; }; sleep 3; done
+if ! docker info >/dev/null 2>&1; then
+  echo "❌ Docker daemon not reachable. In the universal image it auto-starts;"
+  echo "   if this persists, run:  sudo dockerd > /tmp/dockerd.log 2>&1 &   then re-run this script."
+  exit 1
+fi
+
 echo "== Booting DataHub (this pulls images on first run; ~5-10 min) =="
 "$DH_CLI" docker quickstart
 
