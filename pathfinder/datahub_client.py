@@ -37,6 +37,12 @@ _TYPE_MAP = {
 
 # Fragment requesting the fields we need from every relevant entity kind. Kept in
 # one place so the search query and the by-URN query stay in sync.
+# NOTE: `properties.name` has different nullability on DatasetProperties vs
+# DashboardProperties, so selecting it across inline fragments triggers a
+# GraphQL FieldsConflict. We therefore read the top-level `name` where the type
+# has one (Dataset, MLModel, MLFeature*, MLModelGroup) and ALIAS `properties`
+# per type for the ones that only carry a name inside properties (Dashboard,
+# Chart, DataJob). _name_of() knows all these keys.
 _ENTITY_FRAGMENT = """
 fragment PathfinderEntity on Entity {
   urn
@@ -45,33 +51,31 @@ fragment PathfinderEntity on Entity {
     name
     origin
     platform { name properties { displayName } }
-    properties { name }
     subTypes { typeNames }
     tags { tags { tag { urn name } } }
     ownership { owners { owner { ... on CorpUser { urn username } ... on CorpGroup { urn name } } } }
   }
   ... on Dashboard {
-    properties { name }
+    dashboardProperties: properties { name }
     platform { name }
     tags { tags { tag { urn name } } }
     ownership { owners { owner { ... on CorpUser { urn username } ... on CorpGroup { urn name } } } }
   }
   ... on Chart {
-    properties { name }
+    chartProperties: properties { name }
     platform { name }
     ownership { owners { owner { ... on CorpUser { urn username } ... on CorpGroup { urn name } } } }
   }
   ... on MLModel {
     name
-    properties { name }
     tags { tags { tag { urn name } } }
     ownership { owners { owner { ... on CorpUser { urn username } ... on CorpGroup { urn name } } } }
   }
   ... on MLModelGroup { name }
-  ... on MLFeature { name featureNamespace }
+  ... on MLFeature { name }
   ... on MLFeatureTable { name }
   ... on DataJob {
-    properties { name }
+    dataJobProperties: properties { name }
     ownership { owners { owner { ... on CorpUser { urn username } ... on CorpGroup { urn name } } } }
   }
 }
@@ -228,13 +232,16 @@ class DataHubClient:
 
     @staticmethod
     def _name_of(ent: dict[str, Any]) -> str:
-        props = ent.get("properties") or {}
-        if props.get("name"):
-            return props["name"]
         if ent.get("name"):
             return ent["name"]
-        # Fall back to the last URN segment.
-        return ent.get("urn", "unknown").rstrip(")").split(",")[-2] if "," in ent.get("urn", "") else ent.get("urn", "unknown")
+        # Type-aliased properties (see _ENTITY_FRAGMENT), then a plain one.
+        for key in ("dashboardProperties", "chartProperties", "dataJobProperties", "properties"):
+            props = ent.get(key) or {}
+            if props.get("name"):
+                return props["name"]
+        # Fall back to the URN's name segment.
+        urn = ent.get("urn", "unknown")
+        return urn.rstrip(")").split(",")[-2] if "," in urn else urn
 
     @staticmethod
     def _platform_of(ent: dict[str, Any]) -> Optional[str]:
@@ -303,8 +310,8 @@ class DataHubClient:
         # Confirm searchAcrossLineage is accepted with our variable shape.
         probe = self._graphql(
             "query($i:SearchAcrossLineageInput!){ searchAcrossLineage(input:$i){ total } }",
-            {"input": {"urn": "urn:li:corpuser:__pathfinder_probe__",
-                       "direction": "DOWNSTREAM", "query": "*", "start": 0, "count": 1}},
+            {"i": {"urn": "urn:li:corpuser:__pathfinder_probe__",
+                   "direction": "DOWNSTREAM", "query": "*", "start": 0, "count": 1}},
         )
         report["lineage_query_ok"] = "searchAcrossLineage" in probe
         return report
