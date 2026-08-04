@@ -297,7 +297,17 @@ class DataHubClient:
         return bool(data.get("addLink"))
 
     def add_tag(self, resource_urn: str, tag_urn: str) -> bool:
-        """Best-effort tag association (tag must exist in DataHub)."""
+        """Associate a tag, auto-creating the tag entity if it doesn't exist yet."""
+        # Ensure the tag exists first (createTag is idempotent-ish; ignore if present).
+        tag_id = tag_urn.split(":")[-1]
+        try:
+            self._graphql(
+                "mutation($input: CreateTagInput!){ createTag(input: $input) }",
+                {"input": {"id": tag_id, "name": tag_id,
+                           "description": "Reviewed by the Pathfinder PR agent."}},
+            )
+        except DataHubError:
+            pass  # already exists, or createTag not permitted — the association may still work
         try:
             data = self._graphql(
                 "mutation($input: TagAssociationInput!){ addTag(input: $input) }",

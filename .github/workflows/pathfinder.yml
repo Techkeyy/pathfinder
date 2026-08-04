@@ -1,6 +1,9 @@
-# Example consumer workflow — drop this into a data repo (dbt project, etc.).
-# On every PR that touches SQL, Pathfinder comments with the cross-stack +
-# ML blast radius from DataHub.
+# Pathfinder — comment the cross-stack + ML blast radius on data PRs.
+#
+# This is a real, working workflow AND the template to copy into your own data
+# repo. It self-gates: if the DATAHUB_GMS_URL secret isn't set (as on this demo
+# repo, whose DataHub runs in a Codespace the runners can't reach), it SKIPS
+# cleanly instead of failing. Set the secret to turn it on.
 name: Pathfinder
 
 on:
@@ -16,8 +19,21 @@ jobs:
   impact:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: OWNER/pathfinder/action@main
+      - name: Is DataHub configured?
+        id: cfg
+        env:
+          DATAHUB_GMS_URL: ${{ secrets.DATAHUB_GMS_URL }}
+        run: |
+          if [ -z "$DATAHUB_GMS_URL" ]; then
+            echo "::notice::DATAHUB_GMS_URL secret not set — skipping Pathfinder. Add it to enable PR blast-radius checks."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pathfinder blast radius
+        if: steps.cfg.outputs.run == 'true'
+        uses: Techkeyy/pathfinder/action@main
         with:
           datahub-url: ${{ secrets.DATAHUB_GMS_URL }}
           datahub-token: ${{ secrets.DATAHUB_GMS_TOKEN }}
