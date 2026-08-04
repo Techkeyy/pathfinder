@@ -114,7 +114,9 @@ def cmd_run(args) -> int:
 
     # 3) Analyze.
     report = analyze(pairs, lineage, pr, llm=llm, dialect=args.dialect)
-    md = render_markdown(report)
+    # The comment only claims a write-back when this invocation will actually do one.
+    will_write_back = not args.dry_run and not args.lineage_fixture and not args.no_write_back
+    md = render_markdown(report, wrote_back=will_write_back)
     print(md)
 
     # 4) Artifact.

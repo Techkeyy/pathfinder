@@ -29,4 +29,4 @@ from {{ ref('orders') }}
 
 **Owners to notify:** @dana @finance-team @maria
 
-<sub>Pathfinder walked your DataHub lineage graph. Verdicts are deterministic; rationale may be LLM-assisted. This assessment has been written back to the catalog.</sub>
+<sub>Pathfinder walked your DataHub lineage graph. Verdicts are deterministic; rationale may be LLM-assisted.</sub>

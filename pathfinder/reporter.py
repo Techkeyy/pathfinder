@@ -16,7 +16,7 @@ MARKER = "<!-- pathfinder-report -->"  # marker so we can update the comment in 
 _HEADER = MARKER
 
 
-def render_markdown(report: PathfinderReport) -> str:
+def render_markdown(report: PathfinderReport, wrote_back: bool = False) -> str:
     overall = report.overall
     lines: list[str] = [_HEADER]
     lines.append(f"## 🧭 Pathfinder — {overall.emoji} {overall.value.upper()}")
@@ -59,10 +59,12 @@ def render_markdown(report: PathfinderReport) -> str:
         mentions = " ".join(sorted({o.mention() for o in owners}))
         lines.append(f"\n**Owners to notify:** {mentions}")
 
+    writeback_note = (
+        " This assessment has been written back to the catalog." if wrote_back else ""
+    )
     lines.append(
         "\n<sub>Pathfinder walked your DataHub lineage graph. "
-        "Verdicts are deterministic; rationale may be LLM-assisted. "
-        "This assessment has been written back to the catalog.</sub>"
+        "Verdicts are deterministic; rationale may be LLM-assisted." + writeback_note + "</sub>"
     )
     return "\n".join(lines)
 

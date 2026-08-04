@@ -31,7 +31,7 @@ DataHub already holds the one thing that makes this solvable in the open: a
 turns that graph into a guardrail that lives where engineers already work.
 
 ```
-            YOUR CHANGE                    dbt / Recke see this
+            YOUR CHANGE                    dbt / Recce see this
         orders.customer_id  ──►  daily_orders ──►  ltv_calc
                     │                                  │
                     │            ── only DataHub sees this ──
