@@ -193,6 +193,8 @@ class PathfinderReport:
     pr: PullRequestRef
     assessments: list[ImpactAssessment] = field(default_factory=list)
     remediations: list[Remediation] = field(default_factory=list)
+    # Datasets that were changed but not found in DataHub — impact can't be assessed.
+    unresolved: list[str] = field(default_factory=list)
 
     @property
     def overall(self) -> Severity:

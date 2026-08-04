@@ -114,6 +114,12 @@ def cmd_run(args) -> int:
 
     # 3) Analyze.
     report = analyze(pairs, lineage, pr, llm=llm, dialect=args.dialect)
+    # Flag changed datasets that aren't in DataHub, so the report says "cannot
+    # assess" instead of a false "safe to merge" when lineage simply isn't there.
+    if args.lineage_fixture:
+        report.unresolved = [ds for ds, _, _ in pairs if ds not in fixture]
+    else:
+        report.unresolved = [ds for ds, _, _ in pairs if _urn(ds) is None]
     # The comment only claims a write-back when this invocation will actually do one.
     will_write_back = not args.dry_run and not args.lineage_fixture and not args.no_write_back
     md = render_markdown(report, wrote_back=will_write_back)

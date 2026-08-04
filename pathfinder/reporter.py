@@ -17,12 +17,26 @@ _HEADER = MARKER
 
 
 def render_markdown(report: PathfinderReport, wrote_back: bool = False) -> str:
-    overall = report.overall
+    unresolved = report.unresolved
     lines: list[str] = [_HEADER]
-    lines.append(f"## 🧭 Pathfinder — {overall.emoji} {overall.value.upper()}")
+
+    # When nothing resolved, don't claim "safe" — that would be a false negative.
+    if report.total_blast == 0 and unresolved:
+        lines.append("## 🧭 Pathfinder — ⚠️ CANNOT FULLY ASSESS")
+    else:
+        lines.append(f"## 🧭 Pathfinder — {report.overall.emoji} {report.overall.value.upper()}")
+
+    if unresolved:
+        names = ", ".join(f"`{d}`" for d in unresolved)
+        lines.append(
+            f"\n⚠️ **Not found in DataHub:** {names}. Pathfinder can't see any downstream "
+            f"for these, so a lack of findings is **not** a clean bill of health — catalog "
+            f"them to get a real assessment."
+        )
 
     if report.total_blast == 0:
-        lines.append("\nNo downstream assets depend on the changed columns. **Safe to merge.** ✅")
+        if not unresolved:
+            lines.append("\nNo downstream assets depend on the changed columns. **Safe to merge.** ✅")
         return "\n".join(lines)
 
     n = report.total_blast
@@ -64,7 +78,8 @@ def render_markdown(report: PathfinderReport, wrote_back: bool = False) -> str:
     )
     lines.append(
         "\n<sub>Pathfinder walked your DataHub lineage graph. "
-        "Verdicts are deterministic; rationale may be LLM-assisted." + writeback_note + "</sub>"
+        "Verdicts and rationale are deterministic; the drafted fix may be LLM-polished."
+        + writeback_note + "</sub>"
     )
     return "\n".join(lines)
 

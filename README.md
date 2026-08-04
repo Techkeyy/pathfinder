@@ -4,7 +4,7 @@
 
 Pathfinder is a pull-request agent for data teams. When someone opens a PR that
 changes a data model, Pathfinder reads [DataHub's](https://datahub.com) cross-stack
-lineage graph — tables → dashboards → **ML features → ML models → deployments** —
+lineage graph — tables → dashboards → **ML features → ML models** —
 and answers the question every data engineer dreads at 3am:
 
 > *"If I change this column, what silently breaks, and who do I need to tell?"*
@@ -39,7 +39,7 @@ turns that graph into a guardrail that lives where engineers already work.
            📊 Exec Revenue Dashboard        🧬 ml_feature: customer_value
                                                        │
                                                        ▼
-                                              🤖 churn_model  ──►  🚀 PROD deployment
+                                              🤖 churn_model  (serving in production)
 ```
 
 ## What it does
@@ -47,15 +47,16 @@ turns that graph into a guardrail that lives where engineers already work.
 1. **Detects the change** — diffs the SQL/dbt in the PR to find renamed, dropped,
    retyped columns and changed row filters (via `sqlglot`).
 2. **Walks the blast radius** — one DataHub GraphQL `searchAcrossLineage` call
-   returns every downstream dataset, dashboard, ML feature, ML model, and
-   deployment, plus each one's owner.
+   returns every downstream dataset, dashboard, ML feature, and ML model, plus
+   each one's owner.
 3. **Judges severity** — deterministic rules classify each downstream asset as
    🔴 breaking / 🟠 partial / 🟢 safe (a production ML model outranks an internal
-   table). An LLM writes the human-readable rationale.
+   table). The rationale is deterministic too; an optional LLM only polishes the
+   drafted fix, so Pathfinder runs fully without an API key.
 4. **Drafts the fix** — generates a backward-compatible shim (e.g. keep the old
    column name as an alias) so nothing breaks while you migrate.
 5. **Reports + notifies** — posts a PR comment and @-mentions affected owners.
-6. **Writes back** — annotates the changed column in DataHub with the verdict and
+6. **Writes back** — annotates the changed dataset in DataHub with the verdict and
    a link to the PR.
 
 ## Quickstart
@@ -85,7 +86,7 @@ everything pre-wired (a committed [`.devcontainer`](.devcontainer/devcontainer.j
 
 1. **Code ▸ Codespaces ▸ Create codespace on `main`** (pick the 4-core / 16 GB machine).
    The devcontainer installs Pathfinder + the DataHub CLI automatically.
-2. Boot DataHub and seed the demo graph (tables → dashboard → ML feature → model → deployment):
+2. Boot DataHub and seed the demo graph (tables → dashboard → ML feature → ML model):
    ```bash
    bash demo/up.sh          # first run pulls images, ~5-10 min
    ```

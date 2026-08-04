@@ -166,8 +166,10 @@ class DataHubClient:
                 return h.urn
         if hits:
             return hits[0].urn
-        # Nothing indexed under that name — last resort, construct a URN.
-        return self.dataset_urn(name, platform, env)
+        # Nothing indexed under that name. Return None (not a constructed URN) so
+        # the caller can report "cannot assess — not in catalog" instead of a
+        # silently empty blast radius that reads as a false "safe to merge".
+        return None
 
     def entity_exists(self, urn: str) -> bool:
         data = self._graphql("query($urn:String!){ entity(urn:$urn){ urn } }", {"urn": urn})

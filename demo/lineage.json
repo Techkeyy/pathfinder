@@ -44,15 +44,6 @@
       "degree": 2,
       "is_production": true,
       "owners": ["maria@acme.com"]
-    },
-    {
-      "urn": "urn:li:mlModelDeployment:(urn:li:dataPlatform:sagemaker,churn_model_prod,PROD)",
-      "name": "churn_model (serving)",
-      "type": "MLMODEL_DEPLOYMENT",
-      "platform": "sagemaker",
-      "degree": 2,
-      "is_production": true,
-      "owners": ["maria@acme.com"]
     }
   ]
 }

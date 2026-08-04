@@ -5,7 +5,7 @@ quality without running anything.
 
 | File | What it shows |
 |------|----------------|
-| [`orders-rename-pr-comment.md`](orders-rename-pr-comment.md) | The PR comment for renaming `orders.customer_id` → `cust_id`: 6 downstream assets, 5 in production, incl. a prod ML model + its live deployment, with owners and a drafted fix. |
+| [`orders-rename-pr-comment.md`](orders-rename-pr-comment.md) | The PR comment for renaming `orders.customer_id` → `cust_id`: 5 downstream assets across the stack, incl. a production ML model, with owners and a drafted fix. |
 | [`orders-rename-report.json`](orders-rename-report.json) | The machine-readable report for the same change (what CI logs / other agents consume). |
 | [`orders-compat-shim.sql`](orders-compat-shim.sql) | The drafted backward-compatible fix — keeps `customer_id` as an alias so nothing breaks during migration. |
 
