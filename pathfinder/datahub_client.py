@@ -148,19 +148,26 @@ class DataHubClient:
     def resolve_dataset(self, name: str, platform: str, env: str = "PROD") -> Optional[str]:
         """Find the URN for a model/table name.
 
-        Tries the deterministic URN first (cheap, exact); if that entity does not
-        exist we fall back to a keyword search so a bare dbt model name still
-        resolves to whatever platform it actually landed on.
+        Search is the source of truth: it only returns entities that actually
+        exist in the graph, so a bare name like ``orders`` resolves to the
+        indexed ``analytics.orders`` on whatever platform it really landed on.
+
+        We deliberately do NOT probe a constructed URN via ``entity(urn)`` —
+        DataHub echoes *any* well-formed URN back as if it exists (even with no
+        aspects), which would silently resolve to an empty entity.
         """
-        candidate = self.dataset_urn(name, platform, env)
-        if self.entity_exists(candidate):
-            return candidate
-        hits = self.search(name, types=["DATASET"], count=5)
-        # Prefer an exact case-insensitive name match, else the top hit.
+        if name.startswith("urn:li:dataset:"):
+            return name
+        hits = self.search(name, types=["DATASET"], count=10)
+        # Prefer an exact (or `schema.name`) match, else the top hit.
         for h in hits:
-            if h.name.lower() == name.lower() or h.name.lower().endswith("." + name.lower()):
+            n = h.name.lower()
+            if n == name.lower() or n.endswith("." + name.lower()):
                 return h.urn
-        return hits[0].urn if hits else None
+        if hits:
+            return hits[0].urn
+        # Nothing indexed under that name — last resort, construct a URN.
+        return self.dataset_urn(name, platform, env)
 
     def entity_exists(self, urn: str) -> bool:
         data = self._graphql("query($urn:String!){ entity(urn:$urn){ urn } }", {"urn": urn})
@@ -274,6 +281,10 @@ class DataHubClient:
             label = (tag.get("name") or tag.get("urn") or "").lower()
             if any(m in label for m in self.production_markers):
                 return True
+        # ML entities carry their fabric in the URN, not an `origin` aspect —
+        # e.g. urn:li:mlModel:(...,churn_model,PROD). Treat PROD fabric as prod.
+        if etype.is_ml and ent.get("urn", "").rstrip(")").endswith(",PROD"):
+            return True
         return False
 
     # -- write-back ---------------------------------------------------------
