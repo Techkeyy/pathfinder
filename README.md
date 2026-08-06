@@ -118,7 +118,7 @@ Sample outputs judges can read without running anything are in
 |---|---|
 | `change_extractor.py` | SQL/dbt diff → typed column & filter changes |
 | `datahub_client.py` | GraphQL lineage walk → the cross-stack + ML blast radius |
-| `classifier.py` | Deterministic severity + LLM rationale |
+| `classifier.py` | Deterministic severity + rationale (no LLM) |
 | `remediation.py` | Backward-compatible fix generation |
 | `reporter.py` | PR comment + owner notifications |
 | `writeback.py` | Annotate the change back into DataHub |
