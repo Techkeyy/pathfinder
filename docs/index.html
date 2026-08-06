@@ -93,14 +93,14 @@
   /* hero — full-bleed background image (original colour), text over a fade */
   .hero{position:relative; overflow:hidden; min-height:min(90vh,800px); display:flex; align-items:center;
     padding:calc(var(--nav-h) + 36px) 0 72px}
-  .hero::before{content:""; position:absolute; top:0; right:0; bottom:0; width:min(76%,1040px); z-index:0;
-    background:var(--hero-img) no-repeat center right; background-size:cover;
+  .hero::before{content:""; position:absolute; inset:0; z-index:0;
+    background:var(--hero-img) no-repeat center center; background-size:cover;
     animation:heroIn 1.4s cubic-bezier(.2,.7,.2,1) both}
   .hero::after{content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
     background:
-      linear-gradient(90deg, var(--bg) 0%, var(--bg) 24%, transparent 64%),
-      linear-gradient(0deg, var(--bg) 0%, transparent 22%),
-      linear-gradient(180deg, var(--bg) 0%, transparent 16%)}
+      linear-gradient(90deg, var(--bg) 0%, var(--bg) 30%, color-mix(in srgb,var(--bg) 45%, transparent) 52%, transparent 78%),
+      linear-gradient(0deg, var(--bg) 0%, transparent 26%),
+      linear-gradient(180deg, var(--bg) 0%, transparent 14%)}
   @keyframes heroIn{from{opacity:0; transform:scale(1.05)} to{opacity:1; transform:none}}
   .hero .wrap{position:relative; z-index:2}
   .hero-copy{max-width:34ch}
