@@ -1,6 +1,8 @@
 # 🧭 Pathfinder
 
-**Walk the path from a data change to everything it touches — before you break it.**
+**Walk the path from a data change to everything it touches, before you break it.**
+
+**[Live site](https://pathfinder-rosy-ten.vercel.app/)** · **[See it on a real PR](https://github.com/Techkeyy/pathfinder/pull/1)** · [Sample outputs](examples/)
 
 Pathfinder is a pull-request agent for data teams. When someone opens a PR that
 changes a data model, Pathfinder reads [DataHub's](https://datahub.com) cross-stack

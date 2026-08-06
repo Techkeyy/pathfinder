@@ -98,9 +98,13 @@
     animation:heroIn 1.4s cubic-bezier(.2,.7,.2,1) both}
   .hero::after{content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
     background:
-      linear-gradient(90deg, var(--bg) 0%, var(--bg) 30%, color-mix(in srgb,var(--bg) 45%, transparent) 52%, transparent 78%),
-      linear-gradient(0deg, var(--bg) 0%, transparent 26%),
-      linear-gradient(180deg, var(--bg) 0%, transparent 14%)}
+      linear-gradient(95deg,
+        color-mix(in srgb, var(--bg) 84%, transparent) 0%,
+        color-mix(in srgb, var(--bg) 60%, transparent) 38%,
+        color-mix(in srgb, var(--bg) 22%, transparent) 64%,
+        transparent 84%),
+      linear-gradient(0deg, var(--bg) 0%, transparent 22%),
+      linear-gradient(180deg, var(--bg) 0%, transparent 12%)}
   @keyframes heroIn{from{opacity:0; transform:scale(1.05)} to{opacity:1; transform:none}}
   .hero .wrap{position:relative; z-index:2}
   .hero-copy{max-width:34ch}
@@ -267,13 +271,13 @@
   <div class="wrap">
     <div class="hero-copy">
       <span class="eyebrow">PR agent for data teams · built on DataHub</span>
-      <h1>Know what a data change breaks — <em>before</em> it ships.</h1>
-      <p class="lead">The moment you open a pull request, Pathfinder reads DataHub's lineage, traces every downstream table, dashboard, and production ML model, and tells you what breaks, who to warn, and how to fix it — as a comment, right where you already work.</p>
+      <h1>Know what a data change breaks, <em>before</em> it ships.</h1>
+      <p class="lead">The moment you open a pull request, Pathfinder reads DataHub's lineage, traces every downstream table, dashboard, and production ML model, and tells you what breaks, who to warn, and how to fix it. It posts the answer as a comment, right where you already work.</p>
       <div class="hero-cta">
         <a class="btn btn-primary" href="https://github.com/Techkeyy/pathfinder" target="_blank" rel="noreferrer">View on GitHub</a>
         <a class="btn btn-ghost" href="https://github.com/Techkeyy/pathfinder/pull/1" target="_blank" rel="noreferrer">See it on a real PR &nearr;</a>
       </div>
-      <p class="proof"><b>Apache-2.0</b> · built on DataHub's open <b>MCP + GraphQL lineage</b> · <b>19</b> passing tests · verdicts are deterministic</p>
+      <p class="proof"><b>Apache-2.0</b> · built on DataHub's open <b>GraphQL lineage</b> · <b>19</b> passing tests · verdicts are deterministic</p>
     </div>
   </div>
 </header>
