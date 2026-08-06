@@ -1,8 +1,8 @@
-"""Decide how dangerous each change is — deterministically.
+"""Decide how dangerous each change is, deterministically.
 
 Rules decide severity; the LLM (optional, see :mod:`pathfinder.llm`) only writes
 prose. Keeping the *decision* deterministic means Pathfinder gives the same
-verdict every run, works with no API key, and is trivial to unit-test — exactly
+verdict every run, works with no API key, and is trivial to unit-test, exactly
 what a data team needs from a merge gate.
 
 Severity model
@@ -65,7 +65,7 @@ def _reason(change: ColumnChange, asset: DownstreamAsset, sev: Severity) -> str:
     if sev is Severity.PARTIAL:
         if change.change_type in {ChangeType.FILTER_CHANGE, ChangeType.LOGIC_CHANGE}:
             return f"depends on this model {hop}; values may change silently even though nothing errors"
-        return f"depends on {col} {hop} but an intermediate model may shield it — verify"
+        return f"depends on {col} {hop} but an intermediate model may shield it, verify"
     return f"unaffected by an additive change to {col}"
 
 
@@ -88,7 +88,7 @@ def build_assessment(change: ColumnChange, downstream: list[DownstreamAsset]) ->
 def _summary(change: ColumnChange, assessment: ImpactAssessment) -> str:
     n = assessment.blast_count
     if n == 0:
-        return f"{change.detail}: nothing downstream depends on this — safe to merge."
+        return f"{change.detail}: nothing downstream depends on this, safe to merge."
     breaking = assessment.breaking_assets
     prod_breaking = [v for v in breaking if v.asset.is_production]
     head = f"{change.detail}: touches {n} downstream asset{'s' if n != 1 else ''}"

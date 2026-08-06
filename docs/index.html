@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pathfinder — know what a data change breaks before it ships</title>
-<meta name="description" content="A pull-request agent that reads DataHub lineage to catch breaking data changes — down to production ML models — before they merge.">
+<title>Pathfinder, know what a data change breaks before it ships</title>
+<meta name="description" content="A pull-request agent that reads DataHub lineage to catch breaking data changes, down to production ML models, before they merge.">
 </head>
 <body>
 <style>
@@ -90,7 +90,7 @@
   .btn-ghost:hover{transform:scale(.97); color:var(--text-1); border-color:var(--text-1)}
   .btn-sm{padding:9px 17px; font-size:10.5px}
 
-  /* hero — full-bleed background image (original colour), text over a fade */
+  /* hero, full-bleed background image (original colour), text over a fade */
   .hero{position:relative; overflow:hidden; min-height:min(90vh,800px); display:flex; align-items:center;
     padding:calc(var(--nav-h) + 36px) 0 72px}
   .hero::before{content:""; position:absolute; inset:0; z-index:0;
@@ -192,7 +192,7 @@
   .demo-inner .t{font-family:var(--font-serif); font-size:23px; color:var(--text-1)}
   .demo-inner .s{font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-3)}
 
-  /* docs — interactive tabs */
+  /* docs, interactive tabs */
   .tabs{display:flex; flex-wrap:wrap; gap:8px; margin-top:44px; border-bottom:1px solid var(--border); padding-bottom:0}
   .tab{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-3);
     background:none; border:none; border-bottom:2px solid transparent; padding:12px 14px; cursor:pointer; transition:color .18s, border-color .18s}
@@ -289,7 +289,7 @@
       <span class="eyebrow">The 3am problem</span>
       <h2 class="serif">One rename. A silent break three systems away.</h2>
     </div>
-    <p class="lead">Data flows from raw tables, through transformations, into the dashboards people read and the ML models that make live decisions. Change one column and something downstream breaks — but the person making the change can't see that far. They find out in production, at 3am. Tools like dbt docs and Recce show impact <em>inside</em> the dbt project; they can't see the Looker dashboard or the production model that reads the column you're about to rename.</p>
+    <p class="lead">Data flows from raw tables, through transformations, into the dashboards people read and the ML models that make live decisions. Change one column and something downstream breaks, but the person making the change can't see that far. They find out in production, at 3am. Tools like dbt docs and Recce show impact <em>inside</em> the dbt project; they can't see the Looker dashboard or the production model that reads the column you're about to rename.</p>
   </div>
 </section>
 
@@ -299,7 +299,7 @@
     <div class="head">
       <span class="eyebrow">Cross-stack lineage</span>
       <h2 class="serif">dbt tools stop at the project edge. Pathfinder walks past it.</h2>
-      <p class="lead">One <span class="mono" style="color:var(--text-1)">searchAcrossLineage</span> call on DataHub returns the whole blast radius — tables, dashboards, ML features, and the models in production.</p>
+      <p class="lead">One <span class="mono" style="color:var(--text-1)">searchAcrossLineage</span> call on DataHub returns the whole blast radius, tables, dashboards, ML features, and the models in production.</p>
     </div>
     <div class="flow">
       <div class="flow-col">
@@ -325,7 +325,7 @@
     <div class="head">
       <span class="eyebrow">The output</span>
       <h2 class="serif">It comments on the pull request. In plain language.</h2>
-      <p class="lead">No new dashboard, no new habit. Pathfinder writes the verdict where engineers already are — and it's the same comment on a real PR, generated from a live DataHub.</p>
+      <p class="lead">No new dashboard, no new habit. Pathfinder writes the verdict where engineers already are, and it's the same comment on a real PR, generated from a live DataHub.</p>
     </div>
 
     <article class="ghcard" aria-label="Example pull-request comment from Pathfinder">
@@ -335,9 +335,9 @@
         <span class="gh-tag">bot</span>
       </div>
       <div class="gh-body">
-        <div class="verdict"><span class="sq"></span>Pathfinder — BREAKING</div>
+        <div class="verdict"><span class="sq"></span>Pathfinder, BREAKING</div>
         <p class="sum" style="margin-top:12px">This PR affects <b style="color:var(--text-1)">5 downstream assets</b> across your stack, including 2 in production.</p>
-        <h4><span class="mono">orders</span> — renamed <span class="mono">customer_id</span> → <span class="mono">cust_id</span></h4>
+        <h4><span class="mono">orders</span>, renamed <span class="mono">customer_id</span> → <span class="mono">cust_id</span></h4>
         <div class="tbl-wrap">
           <table>
             <thead><tr><th>Sev</th><th>Downstream asset</th><th>Type</th><th>Owner</th><th>Why</th></tr></thead>
@@ -346,11 +346,11 @@
               <tr><td><span class="chip break"><span class="d"></span>break</span></td><td class="asset">churn_model<span class="pill">prod</span></td><td class="why">ml model</td><td class="owner">@maria</td><td class="why">consumes it as a feature; the model breaks at serve time</td></tr>
               <tr><td><span class="chip break"><span class="d"></span>break</span></td><td class="asset">customer_value</td><td class="why">ml feature</td><td class="why">—</td><td class="why">feeds the model; renaming breaks it upstream</td></tr>
               <tr><td><span class="chip break"><span class="d"></span>break</span></td><td class="asset">Exec Revenue</td><td class="why">dashboard</td><td class="owner">@finance-team</td><td class="why">binds to customer_id by name; the tile goes blank</td></tr>
-              <tr><td><span class="chip partial"><span class="d"></span>partial</span></td><td class="asset">analytics.ltv_calc<span class="pill">prod</span></td><td class="why">dataset</td><td class="owner">@dana</td><td class="why">2 hops down; an intermediate model may shield it — verify</td></tr>
+              <tr><td><span class="chip partial"><span class="d"></span>partial</span></td><td class="asset">analytics.ltv_calc<span class="pill">prod</span></td><td class="why">dataset</td><td class="owner">@dana</td><td class="why">2 hops down; an intermediate model may shield it, verify</td></tr>
             </tbody>
           </table>
         </div>
-        <h4 style="margin-top:20px">Suggested fix — compatibility alias</h4>
+        <h4 style="margin-top:20px">Suggested fix, compatibility alias</h4>
         <pre><span class="c">-- keep customer_id available while consumers migrate to cust_id</span>
 select
     *,
@@ -359,7 +359,7 @@ from {{ ref('orders') }}</pre>
         <p class="notify"><b>Owners to notify:</b> <span class="owner">@dana</span> <span class="owner">@finance-team</span> <span class="owner">@maria</span></p>
       </div>
     </article>
-    <p class="caption">A real comment, generated live — <a href="https://github.com/Techkeyy/pathfinder/pull/1" target="_blank" rel="noreferrer">see it on pull request #1 &nearr;</a></p>
+    <p class="caption">A real comment, generated live, <a href="https://github.com/Techkeyy/pathfinder/pull/1" target="_blank" rel="noreferrer">see it on pull request #1 &nearr;</a></p>
   </div>
 </section>
 
@@ -372,11 +372,11 @@ from {{ ref('orders') }}</pre>
     </div>
     <div class="steps">
       <div class="step"><span class="no">01</span><h3>Detect the change</h3><p>Parses the SQL/dbt in the PR to find renamed, dropped, retyped columns and changed row filters.</p><span class="tech">sqlglot diff</span></div>
-      <div class="step"><span class="no">02</span><h3>Walk the blast radius</h3><p>One GraphQL call returns every downstream dataset, dashboard, ML feature, and ML model — with owners.</p><span class="tech">DataHub · searchAcrossLineage</span></div>
+      <div class="step"><span class="no">02</span><h3>Walk the blast radius</h3><p>One GraphQL call returns every downstream dataset, dashboard, ML feature, and ML model, with owners.</p><span class="tech">DataHub · searchAcrossLineage</span></div>
       <div class="step"><span class="no">03</span><h3>Judge severity</h3><p>Deterministic rules rank each asset breaking / partial / safe. A production ML model outranks an internal table.</p><span class="tech">no LLM in the verdict</span></div>
       <div class="step"><span class="no">04</span><h3>Draft the fix</h3><p>Generates a backward-compatible shim so consumers keep working while owners migrate.</p><span class="tech">an optional LLM only polishes this</span></div>
       <div class="step"><span class="no">05</span><h3>Notify the owners</h3><p>Posts the comment and @-mentions exactly the people whose assets are affected.</p><span class="tech">GitHub PR comment</span></div>
-      <div class="step"><span class="no">06</span><h3>Write it back</h3><p>Annotates the dataset in DataHub with the verdict and a link to the PR — the next person inherits it.</p><span class="tech">contributes to the graph</span></div>
+      <div class="step"><span class="no">06</span><h3>Write it back</h3><p>Annotates the dataset in DataHub with the verdict and a link to the PR, the next person inherits it.</p><span class="tech">contributes to the graph</span></div>
     </div>
   </div>
 </section>
@@ -422,14 +422,14 @@ from {{ ref('orders') }}</pre>
       <div class="code"><button class="copy" data-copy="bash demo/up.sh">copy</button><span class="c"># first run pulls images, ~5–10 min</span><br>bash demo/up.sh</div>
     </div>
     <div class="panel" id="cli" role="tabpanel">
-      <p>Confirm the lineage schema, then run against a real PR — it posts the comment and writes the assessment back into DataHub.</p>
+      <p>Confirm the lineage schema, then run against a real PR, it posts the comment and writes the assessment back into DataHub.</p>
       <div class="code"><button class="copy" data-copy="pathfinder doctor
 pathfinder run --pr https://github.com/you/repo/pull/42">copy</button>pathfinder doctor
 pathfinder run <span class="k">--pr</span> https://github.com/you/repo/pull/42</div>
-      <p style="margin-top:16px">Or run offline against a lineage fixture — no DataHub needed — which is how the samples in <span class="mono">examples/</span> were generated.</p>
+      <p style="margin-top:16px">Or run offline against a lineage fixture, no DataHub needed, which is how the samples in <span class="mono">examples/</span> were generated.</p>
     </div>
     <div class="panel" id="ci" role="tabpanel">
-      <p>Drop the action into any data repo. It self-gates — skips cleanly until a DataHub secret is set, so it never fails a PR by accident.</p>
+      <p>Drop the action into any data repo. It self-gates, skips cleanly until a DataHub secret is set, so it never fails a PR by accident.</p>
       <div class="code"><button class="copy" data-copy="- uses: Techkeyy/pathfinder/action@main
   with:
     datahub-url: ${{ secrets.DATAHUB_GMS_URL }}
@@ -451,10 +451,10 @@ pathfinder run <span class="k">--pr</span> https://github.com/you/repo/pull/42</
     </div>
     <div class="panel" id="limits" role="tabpanel">
       <ul class="limits">
-        <li><span class="lab yes">Does</span><span>Traces the whole stack — tables, dashboards, ML features, and <b>production ML models</b> — in one lineage walk.</span></li>
+        <li><span class="lab yes">Does</span><span>Traces the whole stack, tables, dashboards, ML features, and <b>production ML models</b>, in one lineage walk.</span></li>
         <li><span class="lab yes">Does</span><span>Keeps verdicts <b>deterministic</b>; runs with no API key. An LLM only (optionally) polishes the drafted fix.</span></li>
         <li><span class="lab yes">Does</span><span>Reports <b>“cannot assess”</b>, never a false “safe”, when a changed dataset isn't in DataHub.</span></li>
-        <li><span class="lab no">Not yet</span><span>Changes that flow through a bare <span class="mono">SELECT *</span> aren't visible — there are no named columns to diff.</span></li>
+        <li><span class="lab no">Not yet</span><span>Changes that flow through a bare <span class="mono">SELECT *</span> aren't visible, there are no named columns to diff.</span></li>
         <li><span class="lab no">Not yet</span><span>A model's serving <b>deployment</b> is one hop past DataHub's lineage edges; the model itself is flagged, the deployment is roadmap.</span></li>
       </ul>
     </div>

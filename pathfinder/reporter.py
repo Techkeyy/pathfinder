@@ -20,17 +20,17 @@ def render_markdown(report: PathfinderReport, wrote_back: bool = False) -> str:
     unresolved = report.unresolved
     lines: list[str] = [_HEADER]
 
-    # When nothing resolved, don't claim "safe" — that would be a false negative.
+    # When nothing resolved, don't claim "safe", that would be a false negative.
     if report.total_blast == 0 and unresolved:
-        lines.append("## 🧭 Pathfinder — ⚠️ CANNOT FULLY ASSESS")
+        lines.append("## 🧭 Pathfinder, ⚠️ CANNOT FULLY ASSESS")
     else:
-        lines.append(f"## 🧭 Pathfinder — {report.overall.emoji} {report.overall.value.upper()}")
+        lines.append(f"## 🧭 Pathfinder, {report.overall.emoji} {report.overall.value.upper()}")
 
     if unresolved:
         names = ", ".join(f"`{d}`" for d in unresolved)
         lines.append(
             f"\n⚠️ **Not found in DataHub:** {names}. Pathfinder can't see any downstream "
-            f"for these, so a lack of findings is **not** a clean bill of health — catalog "
+            f"for these, so a lack of findings is **not** a clean bill of health, catalog "
             f"them to get a real assessment."
         )
 
@@ -49,7 +49,7 @@ def render_markdown(report: PathfinderReport, wrote_back: bool = False) -> str:
         if not assessment.verdicts:
             continue
         c = assessment.change
-        lines.append(f"\n### `{c.dataset}` — {c.detail}")
+        lines.append(f"\n### `{c.dataset}`, {c.detail}")
         lines.append(f"_{assessment.rationale}_\n")
         lines.append("| Sev | Downstream asset | Type | Owner | Why |")
         lines.append("|-----|------------------|------|-------|-----|")
@@ -86,7 +86,7 @@ def render_markdown(report: PathfinderReport, wrote_back: bool = False) -> str:
 
 def _render_remediation(rem: Remediation) -> str:
     fence = rem.language if rem.language in {"sql", "yaml", "diff"} else ""
-    return f"**{rem.title}** — {rem.explanation}\n\n```{fence}\n{rem.body}\n```"
+    return f"**{rem.title}**, {rem.explanation}\n\n```{fence}\n{rem.body}\n```"
 
 
 def to_json(report: PathfinderReport) -> str:

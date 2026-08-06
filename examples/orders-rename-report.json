@@ -83,7 +83,7 @@
         },
         {
           "severity": "partial",
-          "reason": "depends on `customer_id` 2 hops downstream but an intermediate model may shield it \u2014 verify",
+          "reason": "depends on `customer_id` 2 hops downstream but an intermediate model may shield it, verify",
           "asset": {
             "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,analytics.ltv_calc,PROD)",
             "name": "ltv_calc",
